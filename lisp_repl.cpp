@@ -29,16 +29,16 @@ List Find(const List& list, const std::function<bool(const List&)>& pred)
   if (pred(list))
     return list;
 
-  if (IsNull(list))
-    return Null;
+  if (IsEmptyList(list))
+    return EmptyList;
 
   return Find(Cdr(list), pred);
 }
 List FindKey(const List& list, const Car_t& key)
 {
-  return Find(list, [&key](const List& car)
+  return Find(list, [&key](const List& list)
          {
-           return IsEqual(car, key);
+           return IsEqual(Car(list), key);
          });
 }
 List FindKeyValue(const List& list, const Car_t& key)
@@ -61,7 +61,7 @@ List Read(const std::string_view text)
 }
 List Eval(const List& list, const List& context)
 {
-  if (IsNull(list))
+  if (IsEmptyList(list))
     return list;
 
   const auto& car = Car(list);

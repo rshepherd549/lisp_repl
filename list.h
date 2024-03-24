@@ -25,7 +25,7 @@ constexpr size_t variant_index()
 
 class List;
 
-extern List Null;
+extern const List EmptyList;
 
 using Car_t = std::variant<std::string_view, List>;
 enum Car_
@@ -34,7 +34,7 @@ enum Car_
   list = variant_index<Car_t, List>(),
 };
 
-extern Car_t CarNull;
+extern const Car_t CarNull;
 
 struct Cons_
 {
@@ -51,21 +51,28 @@ public:
 
   ~List();
   List();
-  List(const List& list, const Car_t& value);
   List(const List& list);
+  List(const List& list, const Car_t& value);
   List& operator=(List list);
 
-  List Cons(const Car_t& car) const;
   const Car_t& Car() const;
   List Cdr() const;
-  bool IsNull() const;
+  bool IsEmpty() const;
 };
 
 List Cons(const Car_t& car, const List& cdr);
 const Car_t& Car(const Car_t& car);
 List Cdr(const Car_t& car);
 
-bool IsNull(const Car_t& car);
+List MakeList();
+List MakeList(const Car_t& car);
+
+template <typename... Rest>
+List MakeList(const Car_t& car, Rest... cdr) {
+  return Cons(car, MakeList(cdr...));
+}
+
+bool IsEmptyList(const Car_t& car);
 bool IsAtom(const Car_t& car);
 bool IsEqual(const Car_t& lhs, const Car_t& rhs);
-std::string Print(const Car_t& car);
+std::string to_string(const Car_t& car);

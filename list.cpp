@@ -1,7 +1,7 @@
 #include <list.h>
 
-List Null;
-Car_t CarNull{Null};
+const List EmptyList;
+const Car_t CarNull{EmptyList};
 
 List::~List()
 {
@@ -43,27 +43,32 @@ List& List::operator=(List list)
   std::swap(cons_, list.cons_);
   return *this;
 }
-List List::Cons(const Car_t& value) const
-{
-  return List(*this, value);
-}
-
 const Car_t& List::Car() const
 {
   return cons_ ? cons_->car_ : CarNull;
 }
 List List::Cdr() const
 {
-  return cons_ ? List{cons_->cdr_} : Null;
+  return cons_ ? List{cons_->cdr_} : EmptyList;
 }
-bool List::IsNull() const
+
+List MakeList()
+{
+  return List{};
+}
+List MakeList(const Car_t& car)
+{
+  return Cons(car, EmptyList);
+}
+
+bool List::IsEmpty() const
 {
   return !cons_;
 }
 
 List Cons(const Car_t& car, const List& cdr)
 {
-  return cdr.Cons(car);
+  return List{cdr, car};
 }
 const Car_t& Car(const Car_t& car)
 {
@@ -75,10 +80,10 @@ List Cdr(const Car_t& car)
   const auto list = std::get_if<List>(&car);
   return list ? list->Cdr() : List{};
 }
-bool IsNull(const Car_t& car)
+bool IsEmptyList(const Car_t& car)
 {
   const auto list = std::get_if<List>(&car);
-  return !list || list->IsNull();
+  return !list || list->IsEmpty();
 }
 bool IsAtom(const Car_t& car)
 {
@@ -87,10 +92,8 @@ bool IsAtom(const Car_t& car)
 }
 bool IsEqual(const Car_t& lhs, const Car_t& rhs)
 {
-  if (IsNull(lhs) != IsNull(rhs))
+  if (lhs.index() != rhs.index())
     return false;
-  if (IsNull(lhs))
-    return true;
 
   switch (lhs.index())
   {
@@ -114,9 +117,9 @@ bool IsEqual(const Car_t& lhs, const Car_t& rhs)
 }
 std::string Print(const List& list)
 {
-  return IsNull(list) ? "" : Print(Car(list)) + Print(Cdr(list));
+  return IsEmptyList(list) ? "" : to_string(Car(list)) + Print(Cdr(list));
 }
-std::string Print(const Car_t& car)
+std::string to_string(const Car_t& car)
 {
   if (const auto text = std::get_if<std::string_view>(&car))
     return std::string{*text} + " ";
